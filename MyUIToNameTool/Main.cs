@@ -69,11 +69,17 @@ namespace MyUIToNameTool
 
                 var tableDic = ReadTxt(tablePath);
 
+                int repeatNumber=0, noNameNumber = 0, chineseNameNumber = 0;
+
+                var repeatList = tableDic.Values.ToList().GroupBy(x => x).Where(x => x.Count() > 1).ToList();
+                repeatNumber = repeatList.Count;
+
                 var deleteFiles = new DirectoryInfo(outPath).GetFiles();
                 for (int i = 0; i < deleteFiles.Length; i++)
                 {
                     File.Delete(deleteFiles[i].FullName);
                 }
+
 
                 var files = new DirectoryInfo(inPath).GetFiles();
                 for (int i = 0; i < files.Length; i++)
@@ -81,11 +87,13 @@ namespace MyUIToNameTool
                     string fileName = files[i].Name.Split('.')[0];
                     if (!tableDic.TryGetValue(fileName, out string value))
                     {
+                        chineseNameNumber++;
                         tableDic.Add(fileName, null);
                         value = fileName;
                     }
                     if (string.IsNullOrEmpty(value))
                     {
+                        noNameNumber++;
                         value = fileName;
                     }
                     string filePath = Path.Combine(outPath, value + files[i].Extension);
@@ -94,14 +102,17 @@ namespace MyUIToNameTool
 
                 SaveTxt(tablePath, tableDic);
                 System.Diagnostics.Process.Start("explorer.exe", outPath);
+
+                Console.WriteLine("完成了!!!重复的:{0}    没有名字的:{1}   中文的:{2}"
+                    , repeatNumber , noNameNumber , chineseNameNumber );
+                foreach(var item in repeatList)
+                {
+                    Console.WriteLine(item);
+                }
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-            }
-            finally
-            {
-                Console.WriteLine("完成了");
             }
         }
 
