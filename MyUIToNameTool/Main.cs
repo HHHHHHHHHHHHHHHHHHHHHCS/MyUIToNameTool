@@ -71,7 +71,7 @@ namespace MyUIToNameTool
 
                 int repeatNumber=0, noNameNumber = 0, chineseNameNumber = 0;
 
-                var repeatList = tableDic.Values.ToList().GroupBy(x => x).Where(x => x.Count() > 1).ToList();
+                var repeatList = tableDic.Values.ToList().GroupBy(x => x).Where(x => x.Count() > 1&&x.Key!=null).ToList();
                 repeatNumber = repeatList.Count;
 
                 var deleteFiles = new DirectoryInfo(outPath).GetFiles();
@@ -107,7 +107,7 @@ namespace MyUIToNameTool
                     , repeatNumber , noNameNumber , chineseNameNumber );
                 foreach(var item in repeatList)
                 {
-                    Console.WriteLine(item);
+                    Console.WriteLine(item.Key);
                 }
             }
             catch (Exception e)
@@ -134,17 +134,21 @@ namespace MyUIToNameTool
             bool isStart = true;
             while ((data = sr.ReadLine()) != null)
             {
-                data.Trim();
+                data= data.Trim();
+
+                if (string.IsNullOrEmpty(data))
+                {
+                    continue;
+                }
+
                 if (data == splitLine)
                 {
                     isStart = false;
+                    continue;
                 }
                 else if (isStart)
                 {
-                    if (!string.IsNullOrEmpty(data))
-                    {
                         queue.Enqueue(data.ToLower().Replace(" ", ""));
-                    }
                 }
                 else
                 {
